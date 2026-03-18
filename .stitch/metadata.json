@@ -1,0 +1,15 @@
+{
+  "name": "projects/2487668245889613004",
+  "projectId": "2487668245889613004",
+  "title": "Developer Dashboard (New Tab)",
+  "visibility": "PRIVATE",
+  "projectType": "PROJECT_DESIGN",
+  "origin": "STITCH",
+  "deviceType": "DESKTOP",
+  "screens": {
+    "index": {
+      "id": "ff071875da724bafbf7ac85bed530395",
+      "sourceScreen": "projects/2487668245889613004/screens/ff071875da724bafbf7ac85bed530395"
+    }
+  }
+}
