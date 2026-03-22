@@ -1,111 +1,98 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@theme {
+  /* High-Productivity Engineering Palette */
+  --color-primary: #3b82f6; /* Electric Blue (Toxic/High Energy) */
+  --color-emergency: #ef4444; /* Alert Red */
+  --color-warning: #f59e0b; /* Caution Amber */
+  --color-background-dark: #09090b; /* Deep Zinc (Premium Matte) */
+  --color-panel: #18181b; /* Zinc 900 */
+  --color-border-muted: #27272a; /* Zinc 800 */
+  
+  --font-display: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --radius-lg: 0.5rem;
+  --radius-item: 0.375rem;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --shadow-glow-blue: 0 0 15px rgba(59, 130, 246, 0.3);
+  --shadow-glow-red: 0 0 15px rgba(239, 68, 68, 0.3);
+}
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700');
+
+  body {
+    @apply bg-background-dark text-slate-100 antialiased overflow-hidden h-screen w-screen;
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+.mono { font-family: var(--font-mono); }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
+.panel-border { border: 1px solid var(--color-border-muted); }
+.active-border { border: 1px solid var(--color-primary); box-shadow: var(--shadow-glow-blue); }
+.emergency-border { border: 1px solid var(--color-emergency); box-shadow: var(--shadow-glow-red); }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+/* Custom scrollbar - Zero Distraction */
+.custom-scroll::-webkit-scrollbar { width: 3px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+
+/* Micro-animations */
+.hover-lift { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.hover-lift:hover { transform: translateY(-1px); }
+/* Custom Analog Clock - Neural Theme */
+.clock .hour_hand,
+.clock .min_hand,
+.clock .sec_hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom;
+  border-radius: 10px;
+  z-index: 5;
 }
 
-body {
-  margin: 0;
+.hour_hand {
+  width: 4px;
+  height: 25%;
+  @apply bg-zinc-100/80;
+  margin-left: -2px;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+.min_hand {
+  width: 2px;
+  height: 35%;
+  @apply bg-sky-500/90 shadow-[0_0_8px_rgba(255,255,255,0.2)];
+  margin-left: -1px;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+.sec_hand {
+  width: 1px;
+  height: 42%;
+  @apply bg-rose-500 shadow-glow-blue;
+  margin-left: -0.5px;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+.clock span {
+  position: absolute;
+  @apply text-[10px] font-black text-zinc-300 tracking-tighter uppercase;
+  transform: translate(-50%, -50%);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
+.clock .twelve { top: 12%; left: 50%; @apply text-white text-[16px]; }
+.clock .six { bottom: 12%; left: 50%; transform: translate(-50%, 50%); @apply text-white text-[16px]; }
+.clock .three { right: 12%; top: 50%; transform: translate(50%, -50%); @apply text-white text-[16px]; }
+.clock .nine { left: 12%; top: 50%; transform: translate(-50%, -50%); @apply text-white text-[16px]; }
+
+.clock .one    { top: 18%; left: 68%; }
+.clock .two    { top: 32%; left: 82%; }
+.clock .four   { top: 68%; left: 82%; }
+.clock .five   { top: 82%; left: 68%; }
+.clock .seven  { top: 82%; left: 32%; }
+.clock .eight  { top: 68%; left: 18%; }
+.clock .ten    { top: 32%; left: 18%; }
+.clock .eleven { top: 18%; left: 32%; }
