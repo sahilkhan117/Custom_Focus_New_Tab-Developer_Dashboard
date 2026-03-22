@@ -4,6 +4,8 @@
 
 **Focus New Tab** is a minimalist dashboard engineered for developers, founders, and high-stakes executors. It combines real-time task tracking, habit synchronization, and deep-work tools into a single, portable, privacy-first interface. Designed to eliminate procrastination and keep your immediate priorities front and center.
 
+🔗 **[Live Preview - https://sahilkhan117.github.io/Custom_Focus_New_Tab-Developer_Dashboard/](https://sahilkhan117.github.io/Custom_Focus_New_Tab-Developer_Dashboard/)**
+
 ![](image.png)
 
 <p align="center">
