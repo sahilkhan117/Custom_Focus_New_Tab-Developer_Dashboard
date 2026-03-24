@@ -2,9 +2,9 @@
 
 > **A high-performance, zero-latency mission control center that replaces your default browser new tab page.**
 
-**Focus New Tab** is a minimalist dashboard engineered for developers, founders, and high-stakes executors. It combines real-time task tracking, habit synchronization, and deep-work tools into a single, portable, privacy-first interface. Designed to eliminate procrastination and keep your immediate priorities front and center.
+**Focus New Tab** is a minimalist dashboard engineered for developers, founders, and high-stakes executors. It combines real-time task tracking, habit synchronization, and cognitive scratchpads into a single, portable, privacy-first interface. Designed to eliminate procrastination and keep your immediate priorities front and center.
 
-🔗 **[Live Preview - https://sahilkhan117.github.io/Custom_Focus_New_Tab-Developer_Dashboard/](https://sahilkhan117.github.io/Custom_Focus_New_Tab-Developer_Dashboard/)**
+🔗 **[Live Preview](https://sahilkhan117.github.io/Custom_Focus_New_Tab-Developer_Dashboard/)**
 
 ![](image.png)
 
@@ -28,17 +28,17 @@
 ### ⚡ Priority-Sequenced Task Matrix
 Categorize your workflow into **Emergency**, **Warning**, and **Primary** nodes. The UI automatically promotes high-value execution items, ensuring your most critical tasks are impossible to ignore.
 
-### 🌊 Integrated Focus Timer
-A distraction-free Pomodoro system bound directly to your active task. Track your deep work sessions with a dedicated progress visualization that anchors your attention.
+### 🏆 Daily Achievement Archive
+Completed tasks and habits are automatically moved to the **Completed Protocols** archive. This creates a visual record of your daily wins and allows for easy restoration of tasks if needed.
 
-### 🔄 Habit & Streak Tracking
-Build long-term consistency with recurring protocols. The dashboard features a rolling 14-day history grid and automated streak tracking to visualize your daily momentum.
+### 🧠 Neural Scratchpad (Remember)
+A flexible, unindexed space for brain dumps and mental notes. Features 3 importance-based text sizes (**S, M, L**) to help you visualize the weight of different thoughts and reminders.
+
+### 🔥 Weekly Habit Pulse
+Build long-term consistency with recurring protocols. Track your 7-day performance at a glance with integrated streak tracking and visual consistency markers.
 
 ### 🎯 Milestone Countdown
-A high-visibility tracker for your most critical project deadlines (e.g., product launches, seed pitches, or exams). Visual cues escalate as deadlines approach.
-
-### 📜 Time-Sequenced Agenda
-Keep your standups, meetings, and engineering reviews in sync. A minimalist, chronological timeline of your day's hard commitments.
+A high-visibility tracker for your most critical project deadlines. Features an editable title and Escalate visual cues as dates approach.
 
 ---
 
@@ -46,11 +46,11 @@ Keep your standups, meetings, and engineering reviews in sync. A minimalist, chr
 
 This project is built for absolute speed, zero layout shift, and total privacy.
 
-- **Frontend Core**: React 19 + TypeScript for strict type safety and modern hook patterns.
-- **Build Engine**: Vite 6, aggressively optimized for single-file `index.html` portability.
-- **Styling**: Tailwind CSS 4 using a custom high-contrast, dark-mode design system.
-- **Data Model**: 100% LocalStorage. Completely offline, zero external database calls.
-- **Runtime**: Bun for ultra-fast dependency resolution and script execution.
+- **Frontend Core**: React 19 + TypeScript.
+- **Single-File Distribution**: Vite 6 + `vite-plugin-singlefile`, enabling a completely self-contained `index.html` that works over the `file://` protocol.
+- **Styling**: Tailwind CSS 4 with a custom high-contrast, dark-mode design system.
+- **Data Model**: 100% LocalStorage. Completely offline, zero external database calls or API dependencies.
+- **Runtime**: Bun for ultra-fast development and build cycles.
 
 ---
 
@@ -69,20 +69,17 @@ This project is built for absolute speed, zero layout shift, and total privacy.
    ```bash
    bun run build
    ```
-   *Note: The production build generates a highly optimized, self-contained `dist/index.html` file.*
+   *Note: The production build generates a single, self-contained `dist/index.html` file.*
 
-### Browser Integration Guide
+---
+
+## 🌐 Browser Integration Guide
 
 To set **Focus New Tab** as your custom start page:
 
-#### **For Brave Browser**
+#### **For Brave / Chrome / Edge**
 1. Build the project using `bun run build`.
-2. Navigate to `brave://settings/appearance`.
-3. Under "New Tab Page", select **Blank page**.
-4. Install the [Custom New Tab URL](https://chromewebstore.google.com/detail/custom-new-tab-url/mmcgllhfgdleepmcjfknghochgikelaa) extension.
-5. In the extension settings, provide the local file path to your `dist/index.html` (e.g., `file:///C:/Users/YourName/projects/dist/index.html`).
-
-#### **For Chrome / Edge**
-1. Build the project.
-2. Install the [Custom New Tab](https://chromewebstore.google.com/detail/custom-new-tab/lfjnnkckddkopjfgmbcpdiolnmfobflj) extension.
-3. Configure the extension to point directly to your local `dist/index.html` file.
+2. Install a "Custom New Tab" extension (e.g., [Custom New Tab URL](https://chromewebstore.google.com/detail/custom-new-tab-url/mmcgllhfgdleepmcjfknghochgikelaa)).
+3. In the extension settings, point the URL to your local file path:
+   `file:///D:/path/to/your/new_tab/dist/index.html`
+4. Ensure **"Allow access to file URLs"** is enabled in the extension's browser settings.

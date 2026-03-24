@@ -2,25 +2,19 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type Priority = 'emergency' | 'warning' | 'primary';
 export type TaskStatus = 'active' | 'overdue' | 'done';
+export type MemoryImportance = 1 | 2 | 3; // 1: Small, 2: Medium, 3: Large
 
-export interface Habit {
-  id: number;
+export interface MemoryNode {
+  id: string;
   title: string;
-  streak: number;
+  detail: string;
+  importance: MemoryImportance;
 }
 
 export interface QuickLink {
   id: number;
   url: string;
   title: string;
-  localIcon?: string;
-}
-
-export interface AgendaItem {
-  id: string;
-  time: string;
-  title: string;
-  meta: string;
 }
 
 export interface Task {
@@ -30,20 +24,19 @@ export interface Task {
   status: TaskStatus;
   isHabit?: boolean;
   streak?: number;
-  lastCompletedDate?: string; // YYYY-MM-DD
-  history?: Record<string, boolean>; // YYYY-MM-DD -> boolean
+  history?: Record<string, boolean>; // date string -> isDone
   code?: string;
 }
 
 interface AppState {
   tasks: Task[];
   activeTaskId: number | null;
-  pomodoroTime: number; // seconds
+  pomodoroTime: number; 
   isPomodoroActive: boolean;
   isFocusMode: boolean;
   quickLinks: QuickLink[];
-  targetDeadline: string; // ISO date string
-  agendaItems: AgendaItem[];
+  targetDeadline: string; 
+  memories: MemoryNode[];
   deadlineTitle: string;
 }
 
@@ -60,49 +53,17 @@ interface AppContextType extends AppState {
   removeQuickLink: (id: number) => void;
   setTargetDeadline: (date: string) => void;
   setDeadlineTitle: (title: string) => void;
-  addAgendaItem: (time: string, title: string, meta: string) => void;
-  removeAgendaItem: (id: string) => void;
+  addMemory: (title: string, detail: string, importance: MemoryImportance) => void;
+  removeMemory: (id: string) => void;
+  updateMemory: (id: string, title: string, detail: string, importance: MemoryImportance) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Updated to Founder/Senior Dev Persona
-const DEFAULT_TASKS: Task[] = [
-  { id: 1, title: "Approve PR #402 (Next.js App Router)", priority: 'emergency', status: 'active' },
-  { id: 2, title: "Finalize serverless DB scaling strategy", priority: 'warning', status: 'active' },
-  { id: 3, title: "Draft slides 4-7 for angel investor meeting", priority: 'primary', status: 'active' },
-  { id: 4, title: "Leetcode", priority: 'emergency', status: 'active', isHabit: true, streak: 12, lastCompletedDate: '', history: {} }
-];
-
-// Updated to Production/Founder Tools
-const DEFAULT_LINKS: QuickLink[] = [
-  { id: 1, url: 'https://leetcode.com', title: 'LeetCode' },
-  { id: 2, url: 'https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/', title: 'TakeUForward' },
-  { id: 3, url: 'https://aws.amazon.com', title: 'AWS' },
-  { id: 4, url: 'https://vercel.com', title: 'Vercel' },
-  { id: 5, url: 'https://notion.com', title: 'notion' },
-];
-
-// Updated to High-Stakes Schedule
-const DEFAULT_AGENDA: AgendaItem[] = [
-  { id: '1', time: '09:30', title: 'Daily Meeting: Eng Team', meta: 'Blocker review' },
-  { id: '2', time: '14:00', title: 'New Product Pitch Practice', meta: 'With Co-founder' }
-];
-
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>(() => {
-    // Incremented to v4 to force cache refresh for new mock data
-    const saved = localStorage.getItem('dev_dashboard_tasks_v4');
-    const loadedTasks: Task[] = saved ? JSON.parse(saved) : DEFAULT_TASKS;
-    
-    // Habit Reset Logic (run during initialization)
-    const today = new Date().toISOString().split('T')[0];
-    return loadedTasks.map(task => {
-      if (task.isHabit && task.status === 'done' && task.lastCompletedDate !== today) {
-        return { ...task, status: 'active' };
-      }
-      return task;
-    });
+    const saved = localStorage.getItem('dev_dashboard_tasks_v3');
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [activeTaskId, setActiveTaskId] = useState<number | null>(null);
@@ -111,39 +72,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isFocusMode, setIsFocusMode] = useState(false);
 
   const [quickLinks, setQuickLinks] = useState<QuickLink[]>(() => {
-    // Incremented to v3
-    const saved = localStorage.getItem('dev_dashboard_links_v3');
-    const links: QuickLink[] = saved ? JSON.parse(saved) : DEFAULT_LINKS;
-    
-    // Auto-assign local icons for defaults
-    return links.map(link => {
-      return { ...link, localIcon: link.localIcon };
-    });
+    const saved = localStorage.getItem('dev_dashboard_links_v2');
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [targetDeadline, setTargetDeadline] = useState<string>(() => {
-    const saved = localStorage.getItem('dev_dashboard_deadline_v3');
-    // Set a default deadline ~30 days out for the seed round
-    const defaultDate = new Date();
-    defaultDate.setDate(defaultDate.getDate() + 30);
-    return saved || defaultDate.toISOString();
+    const saved = localStorage.getItem('dev_dashboard_deadline_v2');
+    if (saved) return saved;
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date.toISOString();
   });
 
   const [deadlineTitle, setDeadlineTitle] = useState<string>(() => {
-    return localStorage.getItem('dev_dashboard_deadline_title_v3') || 'New Product Launch';
+    return localStorage.getItem('dev_dashboard_deadline_title_v2') || 'Neural Deadline';
   });
 
-  const [agendaItems, setAgendaItems] = useState<AgendaItem[]>(() => {
-    const saved = localStorage.getItem('dev_dashboard_agenda_v3');
-    return saved ? JSON.parse(saved) : DEFAULT_AGENDA;
+  const [memories, setMemories] = useState<MemoryNode[]>(() => {
+    const saved = localStorage.getItem('dev_dashboard_memories_v1');
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // Effects - Using updated v3/v4 keys
-  useEffect(() => { localStorage.setItem('dev_dashboard_tasks_v4', JSON.stringify(tasks)); }, [tasks]);
-  useEffect(() => { localStorage.setItem('dev_dashboard_links_v3', JSON.stringify(quickLinks)); }, [quickLinks]);
-  useEffect(() => { localStorage.setItem('dev_dashboard_deadline_v3', targetDeadline); }, [targetDeadline]);
-  useEffect(() => { localStorage.setItem('dev_dashboard_agenda_v3', JSON.stringify(agendaItems)); }, [agendaItems]);
-  useEffect(() => { localStorage.setItem('dev_dashboard_deadline_title_v3', deadlineTitle); }, [deadlineTitle]);
+  // Effects
+  useEffect(() => { localStorage.setItem('dev_dashboard_tasks_v3', JSON.stringify(tasks)); }, [tasks]);
+  useEffect(() => { localStorage.setItem('dev_dashboard_links_v2', JSON.stringify(quickLinks)); }, [quickLinks]);
+  useEffect(() => { localStorage.setItem('dev_dashboard_deadline_v2', targetDeadline); }, [targetDeadline]);
+  useEffect(() => { localStorage.setItem('dev_dashboard_memories_v1', JSON.stringify(memories)); }, [memories]);
+  useEffect(() => { localStorage.setItem('dev_dashboard_deadline_title_v2', deadlineTitle); }, [deadlineTitle]);
 
   const addTask = (title: string, priority: Priority, isHabit: boolean) => {
     setTasks(prev => [...prev, {
@@ -152,27 +107,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       priority: isHabit ? 'emergency' : priority,
       status: 'active',
       isHabit,
-      history: isHabit ? {} : undefined,
       streak: isHabit ? 0 : undefined
     }]);
   };
 
   const toggleTaskDone = (id: number) => {
-    const today = new Date().toISOString().split('T')[0];
     setTasks(prev => prev.map(t => {
       if (t.id === id) {
         if (t.isHabit) {
-          const isCompleting = t.status !== 'done';
-          return { 
-            ...t, 
-            status: isCompleting ? 'done' : 'active',
-            streak: isCompleting ? (t.streak || 0) + 1 : Math.max(0, (t.streak || 0) - 1),
-            lastCompletedDate: isCompleting ? today : t.lastCompletedDate,
-            history: {
-              ...(t.history || {}),
-              [today]: isCompleting
-            }
-          };
+          const today = new Date().toISOString().split('T')[0];
+          const currentStatus = t.history?.[today] || false;
+          const newHistory = { ...t.history, [today]: !currentStatus };
+          const newStreak = !currentStatus ? (t.streak || 0) + 1 : Math.max(0, (t.streak || 0) - 1);
+          return { ...t, streak: newStreak, history: newHistory };
         }
         return { ...t, status: t.status === 'done' ? 'active' : 'done' };
       }
@@ -185,29 +132,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const stopPomodoro = () => setIsPomodoroActive(false);
   const resetPomodoro = () => { setIsPomodoroActive(false); setPomodoroTime(25 * 60); };
   
-  const addQuickLink = (url: string, title: string) => {
-    let localIcon: string | undefined = undefined;
-    const domain = new URL(url).hostname;
-    
-    if (domain.includes('github.com')) localIcon = 'github.png';
-    else if (domain.includes('google.com')) localIcon = 'google.png';
-    else if (domain.includes('linkedin.com')) localIcon = 'linkedin.png';
-    else if (domain.includes('netflix.com')) localIcon = 'netflix.png';
-
-    setQuickLinks(prev => [...prev, { id: Date.now(), url, title, localIcon }]);
-  };
+  const addQuickLink = (url: string, title: string) => setQuickLinks(prev => [...prev, { id: Date.now(), url, title }]);
   const removeQuickLink = (id: number) => setQuickLinks(prev => prev.filter(l => l.id !== id));
 
-  const addAgendaItem = (time: string, title: string, meta: string) => {
-    setAgendaItems(prev => [...prev, { id: Date.now().toString(), time, title, meta }].sort((a,b) => a.time.localeCompare(b.time)));
+  const addMemory = (title: string, detail: string, importance: MemoryImportance) => {
+    setMemories(prev => [{ id: Date.now().toString(), title, detail, importance }, ...prev]);
   };
-  const removeAgendaItem = (id: string) => setAgendaItems(prev => prev.filter(item => item.id !== id));
+  const removeMemory = (id: string) => setMemories(prev => prev.filter(m => m.id !== id));
+  const updateMemory = (id: string, title: string, detail: string, importance: MemoryImportance) => {
+    setMemories(prev => prev.map(m => m.id === id ? { ...m, title, detail, importance } : m));
+  };
 
   const value = {
-    tasks, activeTaskId, pomodoroTime, isPomodoroActive, isFocusMode, quickLinks, targetDeadline, agendaItems, deadlineTitle,
+    tasks, activeTaskId, pomodoroTime, isPomodoroActive, isFocusMode, quickLinks, targetDeadline, memories, deadlineTitle,
     addTask, toggleTaskDone, deleteTask, setFocusMode: setIsFocusMode, setActiveTask: setActiveTaskId,
     startPomodoro, stopPomodoro, resetPomodoro, addQuickLink, removeQuickLink, setTargetDeadline, setDeadlineTitle,
-    addAgendaItem, removeAgendaItem
+    addMemory, removeMemory, updateMemory
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

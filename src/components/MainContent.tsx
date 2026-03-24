@@ -26,30 +26,28 @@ export function RapidAccess() {
       <div className="flex-1 overflow-x-auto custom-scroll pb-2">
         <div className="flex gap-4 items-center justify-center min-w-max px-2">
           {quickLinks.map(link => (
-            <div key={link.id} className="relative group shrink-0">
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noreferrer"
-                className="w-18 h-18 border border-zinc-900 rounded-3xl bg-zinc-700/50 flex items-center justify-center transition-all overflow-hidden hover-lift shadow-lg"
-                title={link.title}
-              >
-                <img
-                  className="h-14 p-1 object-contain rounded-2xl"
-                  alt={link.title}
-                  src={link.localIcon ? `/icons/${link.localIcon}` : `https://www.google.com/s2/favicons?domain=${link.url}&sz=128`}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${link.url}&sz=128`;
-                  }}
-                />
-              </a>
-              <button
-                onClick={() => removeQuickLink(link.id)}
-                className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-lg flex items-center justify-center"
-              >
-                <LuX size={10} strokeWidth={3} />
-              </button>
-            </div>
+              <div key={link.id} className="relative flex flex-col group shrink-0">
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-18 h-18 border border-zinc-900 rounded-3xl bg-zinc-700/50 flex items-center justify-center transition-all overflow-hidden hover-lift shadow-lg"
+                  title={link.title}
+                >
+                  <img
+                    className="h-14 p-1 object-contain rounded-2xl"
+                    alt={link.title}
+                    src={`https://www.google.com/s2/favicons?domain=${link.url}&sz=128`}
+                  />
+                </a>
+                <button
+                  onClick={() => removeQuickLink(link.id)}
+                  className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-lg flex items-center justify-center"
+                >
+                  <LuX size={10} strokeWidth={3} />
+                </button>
+                <DataText className="text-xs text-zinc-300 text-center mt-1 hover:text-white uppercase font-black tracking-widest transition-colors">{link.title}</DataText>
+              </div>
           ))}
 
           {showInput ? (
@@ -100,7 +98,10 @@ export function ExecutionList() {
   } = useApp();
 
   const sortedTasks = [...tasks]
-    .filter(task => !(task.isHabit && task.status === 'done'))
+    .filter(task => {
+      if (task.isHabit) return !task.history?.[new Date().toISOString().split('T')[0]];
+      return task.status !== 'done';
+    })
     .sort((a, b) => {
       if (a.isHabit && !b.isHabit) return -1;
       if (!a.isHabit && b.isHabit) return 1;
@@ -119,7 +120,7 @@ export function ExecutionList() {
   return (
     <div className="flex-1 bg-black/40 border border-zinc-900 rounded-3xl flex flex-col overflow-hidden shadow-2xl">
       <div className="flex border-b border-zinc-950 px-6 py-4 justify-between items-center bg-zinc-950/30">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-sky-500/40">Neural Execution Stream</h2>
+        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-sky-500">Personal Execution Stream</h2>
         <DataText className="text-[9px] text-sky-400 font-black">{sortedTasks.length} NODES ACTIVE</DataText>
       </div>
 
@@ -150,7 +151,7 @@ export function ExecutionList() {
               <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[15px] font-bold tracking-tight truncate ${task.status === 'done' ? 'text-zinc-700 line-through opacity-40' : 'text-zinc-100'}`}>{task.title}</span>
+                    <span className={`text-[15px] font-bold tracking-tight truncate hover:text-sky-400 ${task.status === 'done' ? 'text-zinc-200 line-through opacity-80' : 'text-zinc-100'}`}>{task.title}</span>
                     {task.isHabit && (
                       <DataText className="text-[9px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">Recurring</DataText>
                     )}
@@ -178,7 +179,7 @@ export function ExecutionList() {
               {task.isHabit && (
                 <div className="flex items-center gap-2 bg-black px-3 py-1.5 rounded-xl border border-zinc-900 group-hover:border-sky-900/50 transition-colors">
                   <LuFlame className="text-sky-400" size={12} />
-                  <DataText className="text-[11px] text-zinc-400 font-black">{task.streak}D</DataText>
+                  <DataText className="text-[11px] text-rose-500 font-black">{task.streak}D</DataText>
                 </div>
               )}
 
@@ -221,7 +222,7 @@ export function ExecutionList() {
           <button
             type="button"
             onClick={() => setIsHabitMode(!isHabitMode)}
-            className={`flex items-center gap-2.5 px-5 py-2 rounded-xl border transition-all text-[10px] font-black uppercase tracking-widest ${isHabitMode ? 'bg-sky-500 border-sky-500 text-white shadow-glow-blue' : 'border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}
+            className={`flex items-center gap-2.5 px-5 py-2 rounded-xl border transition-all text-[10px] font-black uppercase tracking-widest ${isHabitMode ? 'bg-sky-500 border-sky-500 text-white shadow-glow-blue' : 'border-zinc-800 text-zinc-400 hover:text-zinc-300'}`}
           >
             <LuRefreshCcw size={12} strokeWidth={3} />
             Recurring Protocol
@@ -230,13 +231,13 @@ export function ExecutionList() {
 
         <div className="flex gap-3">
           <input
-            className="flex-1 bg-black border border-zinc-900 rounded-xl px-4 py-3 text-sm font-mono text-zinc-100 focus:outline-none focus:border-sky-500/50 transition-all placeholder:text-zinc-700 shadow-inner"
-            placeholder={`Commit ${isHabitMode ? 'recurring habit' : 'active node'}...`}
+            className="flex-1 bg-black border border-zinc-900 rounded-xl px-4 py-3 text-sm font-mono text-zinc-100 focus:outline-none focus:border-sky-500/50 transition-all placeholder:text-zinc-400 shadow-inner"
+            placeholder={`${isHabitMode ? 'Recurring Protocol' : '🔥 Active Node'}...`}
             type="text"
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
           />
-          <button type="submit" className="mono text-[11px] bg-zinc-950 px-8 py-3 rounded-xl uppercase font-black tracking-widest text-sky-500 hover:bg-sky-500 hover:text-white transition-all duration-300 border border-sky-900/30">Commit</button>
+          <button type="submit" className="mono text-[14px] bg-sky-500 px-4 my-0.5 rounded-2xl uppercase font-black tracking-widest text-white hover:bg-sky-500 hover:text-white transition-all duration-300 border border-sky-900/30">Commit</button>
         </div>
       </form>
     </div>

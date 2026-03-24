@@ -1,7 +1,9 @@
 import { Panel, SectionLabel, DataText } from './UI';
 import { useTime, useCountdown } from '../hooks/useTime';
 import { useApp } from '../data/store';
-import { LuZap, LuPause, LuPlay, LuRefreshCw } from 'react-icons/lu';
+import { LuHistory, LuFlame } from 'react-icons/lu';
+import { LucideCheckCircle2 } from 'lucide-react';
+
 
 export function AnalogClock() {
   const { hours, minutes, seconds } = useTime();
@@ -87,58 +89,62 @@ export function CriticalWindow() {
   );
 }
 
-export function Pomodoro() {
-  const {
-    pomodoroTime,
-    isPomodoroActive,
-    startPomodoro,
-    stopPomodoro,
-    resetPomodoro,
-    tasks,
-    activeTaskId
-  } = useApp();
+export function CompletedArchive() {
+  const { tasks, toggleTaskDone } = useApp();
+  const todayStr = new Date().toISOString().split('T')[0];
 
-  const activeTask = tasks.find(t => t.id === activeTaskId);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  };
-
-  const currentProgress = ((25 * 60 - pomodoroTime) / (25 * 60)) * 100;
+  const completedTasks = tasks.filter(t => 
+    (!t.isHabit && t.status === 'done') || 
+    (t.isHabit && t.history?.[todayStr])
+  );
 
   return (
-    <Panel className="mt-auto border-sky-900/40 bg-black/40">
+    <Panel className="mt-auto border-sky-900/40 bg-black/40 flex-1 flex flex-col min-h-0">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <LuZap className="text-sky-500 text-lg" />
-          <SectionLabel className="mb-0 text-slate-100 uppercase font-black tracking-widest">Neural Deep Work</SectionLabel>
+          <LucideCheckCircle2 className="text-sky-500 text-lg" />
+          <SectionLabel className="mb-0 text-slate-100 uppercase font-black tracking-widest">Completed Protocols</SectionLabel>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={isPomodoroActive ? stopPomodoro : startPomodoro}
-            className="text-zinc-500 hover:text-sky-400 transition-all transform hover:scale-110 active:scale-95"
-            title={isPomodoroActive ? 'Pause Session' : 'Start Session'}
-          >
-            {isPomodoroActive ? <LuPause size={18} /> : <LuPlay size={18} />}
-          </button>
-          <button
-            onClick={resetPomodoro}
-            className="text-zinc-500 hover:text-red-500 transition-all transform hover:rotate-180"
-            title="Reset Cycle"
-          >
-            <LuRefreshCw size={16} />
-          </button>
-        </div>
+        <DataText className="text-[16px] text-sky-400 font-black">{completedTasks.length} NODES</DataText>
       </div>
-      <DataText className="text-5xl font-black mb-3 tracking-tighter block text-zinc-100">{formatTime(pomodoroTime)}</DataText>
-      <div className="w-full h-1.5 bg-zinc-900 rounded-full mb-6 overflow-hidden">
-        <div className="h-full bg-sky-500 transition-all duration-700 shadow-glow-blue" style={{ width: `${currentProgress}%` }}></div>
+
+      <div className="flex-1 overflow-y-auto custom-scroll pr-2 flex flex-col gap-3">
+        {completedTasks.length > 0 ? (
+          completedTasks.map(task => (
+            <div 
+              key={task.id} 
+              onClick={() => toggleTaskDone(task.id)}
+              className="flex flex-col gap-1 p-3 bg-zinc-950/40 rounded-xl border border-zinc-900/50 animate-in fade-in slide-in-from-left-4 duration-300 cursor-pointer hover:bg-zinc-900/40 transition-colors group"
+              title="Click to restore to mission list"
+            >
+              <div className="flex items-center gap-2">
+                <div className={`w-1.5 h-1.5 rounded-full ${task.isHabit ? 'bg-sky-500 shadow-glow-blue' : 'bg-emerald-500'}`}></div>
+                <span className="text-[13px] font-bold text-zinc-400 line-through tracking-tight truncate group-hover:text-sky-400 transition-colors">{task.title}</span>
+              </div>
+              {task.isHabit && (
+                 <div className="flex items-center gap-1.5 opacity-80 ml-3.5">
+                   <LuFlame size={10} className="text-sky-400" />
+                   <span className="text-[9px] font-black uppercase tracking-tighter text-zinc-300">{task.streak}D Streak Maintained</span>
+                 </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full opacity-10 py-10 scale-90">
+            <LuHistory size={48} className="mb-4" />
+            <p className="text-[10px] uppercase font-black tracking-[0.4em] text-center px-4">Daily Archive Empty</p>
+          </div>
+        )}
       </div>
-      <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-3">
-        <SectionLabel className="text-[9px] text-sky-500/50 mb-1.5 font-black uppercase tracking-[0.2em]">Active Node</SectionLabel>
-        <p className="text-[13px] font-bold text-zinc-300 truncate tracking-tight">{activeTask?.title || "NO LINK ESTABLISHED"}</p>
+
+      <div className="mt-4 pt-4 border-t border-zinc-950">
+         <div className="flex justify-between items-center opacity-30">
+            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600">Sync Status</span>
+            <div className="flex gap-1">
+               <div className="w-1 h-1 bg-sky-500 rounded-full"></div>
+               <div className="w-1 h-1 bg-sky-500 rounded-full animate-pulse"></div>
+            </div>
+         </div>
       </div>
     </Panel>
   );
@@ -149,7 +155,7 @@ export function SidebarLeft() {
     <aside className="flex flex-col gap-4 h-full">
       <AnalogClock />
       <CriticalWindow />
-      <Pomodoro />
+      <CompletedArchive />
     </aside>
   );
 }
